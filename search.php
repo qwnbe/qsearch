@@ -1,137 +1,13 @@
 <?php
 session_start();
+// Загружаем данные из JSON файла
+$mockDatabaseFile = 'websites.json';
 
-// Массив с данными "базы данных"
-$mockDatabase = array(
-    $mockDatabase = array(
-        array(
-            "title" => "Яндекс",
-            "alt_titles" => array("Yandex", "Yandex.ru", "Yndx", "Яndex", "яндекс", "ya.ru"),
-            "url" => "https://ya.ru",
-            "description" => "Яндекс — российская многофункциональная поисковая система и интернет-портал.",
-            "verified" => true
-        ),
-        array(
-            "title" => "ВКонтакте",
-            "alt_titles" => array("ВКонтакте", "ВК", "вк", "vk.com", "вк.ком"),
-            "url" => "https://vk.com",
-            "description" => "ВКонтакте – универсальное средство для общения и поиска друзей и одноклассников, которым ежедневно пользуются десятки миллионов людей",
-            "verified" => true
-        ),
-        array(
-            "title" => "Gmail",
-            "alt_titles" => array("gmail", "гугл", "гугл почта", "почта", "Почта","Гугл почта","Гугл","Google","Гугл","Gmail","mail.google.com"),
-            "url" => "https://mail.google.com",
-            "description" => "Gmail - электронная почта от Google",
-            "verified" => true
-        ),
-        array(
-            "title" => "Google",
-            "alt_titles" => array("гугл", "Гугл","Google","google.com"),
-            "url" => "https://google.com",
-            "description" => "Google - самая популярная поисковая система в мире.",
-            "verified" => true
-        ),
-        array(
-            "title" => "Одноклассники",
-            "alt_titles" => array("Одноклассники", "OK.ru", "ок", "ok.ru", "Odnoklassniki"),
-            "url" => "https://ok.ru",
-            "description" => "Одноклассники — социальная сеть для поиска одноклассников, коллег и друзей.",
-            "verified" => true
-        ),
-        array(
-            "title" => "Авито",
-            "alt_titles" => array("Avito", "avito.ru", "авито", "Avito Russia"),
-            "url" => "https://avito.ru",
-            "description" => "Авито — российский сайт объявлений для покупки и продажи товаров и услуг.",
-            "verified" => true
-        ),
-        array(
-            "title" => "Mail.ru",
-            "alt_titles" => array("Mail.ru", "mail.ru", "мейл", "мэйл.ру", "Mail Ru"),
-            "url" => "https://mail.ru",
-            "description" => "Mail.ru — почтовый сервис и интернет-портал с новостями, играми и социальными сетями.",
-            "verified" => true
-        ),
-        array(
-            "title" => "РБК",
-            "alt_titles" => array("RBK", "rbc.ru", "рбк", "РБК новости"),
-            "url" => "https://rbc.ru",
-            "description" => "РБК — ведущий российский информационный портал с новостями о бизнесе, политике и экономике.",
-            "verified" => true
-        ),
-        array(
-            "title" => "Кинопоиск",
-            "alt_titles" => array("Кинопоиск", "Kinopoisk", "КиноПоиск", "kino.poisk.ru"),
-            "url" => "https://www.kinopoisk.ru",
-            "description" => "Кинопоиск — крупнейший российский сервис для поиска информации о фильмах, сериалах и актерах.",
-            "verified" => true
-        ),
-        array(
-            "title" => "Чемпионат",
-            "alt_titles" => array("championat.com", "Чемпионат", "Чемпионат ком", "Спорт чемпионат"),
-            "url" => "https://www.championat.com",
-            "description" => "Чемпионат — популярный российский портал спортивных новостей и статистики.",
-            "verified" => true
-        ),
-        array(
-            "title" => "Лабиринт",
-            "alt_titles" => array("Labirint", "Labirint.ru", "Лабиринт", "Лабиринт книги"),
-            "url" => "https://www.labirint.ru",
-            "description" => "Лабиринт — интернет-магазин книг, учебников и канцелярии.",
-            "verified" => true
-        ),
-        array(
-            "title" => "Рамблер",
-            "alt_titles" => array("Rambler", "rambler.ru", "рамблер", "рамблер новости"),
-            "url" => "https://www.rambler.ru",
-            "description" => "Рамблер — российский информационно-развлекательный портал с новостями и почтовым сервисом.",
-            "verified" => true
-        ),
-        array(
-            "title" => "Хабр",
-            "alt_titles" => array("Habr", "habr.com", "хабр", "Habrahabr"),
-            "url" => "https://habr.com",
-            "description" => "Хабр — сообщество разработчиков и специалистов в сфере ИТ и цифровых технологий.",
-            "verified" => true
-        ),
-        array(
-            "title" => "Циан",
-            "alt_titles" => array("Cian", "cian.ru", "циан", "Циан недвижимость"),
-            "url" => "https://www.cian.ru",
-            "description" => "Циан — российская платформа для аренды и продажи недвижимости.",
-            "verified" => true
-        ),
-        array(
-            "title" => "Туту.ру",
-            "alt_titles" => array("Tutu", "tutu.ru", "туту", "билеты туту"),
-            "url" => "https://www.tutu.ru",
-            "description" => "Туту.ру — сервис для поиска и покупки билетов на поезд, самолет и автобус.",
-            "verified" => true
-        ),
-        array(
-            "title" => "Газета.ру",
-            "alt_titles" => array("Газета", "gazeta.ru", "газета ру", "Газета новости"),
-            "url" => "https://www.gazeta.ru",
-            "description" => "Газета.ру — один из ведущих российских новостных порталов.",
-            "verified" => true
-        ),
-        array(
-            "title" => "Озон",
-            "alt_titles" => array("Ozon", "ozon.ru", "озон", "OZON.RU"),
-            "url" => "https://www.ozon.ru",
-            "description" => "Озон — крупный российский интернет-магазин товаров широкого ассортимента.",
-            "verified" => true
-        ),
-        array(
-            "title" => "РИА Новости",
-            "alt_titles" => array("РИА", "ria.ru", "РИА Новости", "Риа"),
-            "url" => "https://ria.ru",
-            "description" => "РИА Новости — государственное информационное агентство с последними новостями России и мира.",
-            "verified" => true
-        ),
-    )
-    );
+if (file_exists($mockDatabaseFile)) {
+    $mockDatabaseData = file_get_contents($mockDatabaseFile);
+    $mockDatabase = json_decode($mockDatabaseData, true);
+} else {
+}
 
 // Проверка на наличие поискового запроса
 $query = isset($_GET['query']) ? htmlspecialchars($_GET['query']) : "";
@@ -192,7 +68,6 @@ function wikipediaSearch($query) {
     return null;
 }
 
-
 // Получаем результаты поиска по "базе данных"
 $results = searchResults($query, $mockDatabase);
 
@@ -217,6 +92,7 @@ $wikiResult = $query ? wikipediaSearch($query) : null;
                 </button>
         </form>
     </div>
+    <!-- CSS стили -->
     <style>
         /* Стили для страницы */
         body {
@@ -420,4 +296,3 @@ $wikiResult = $query ? wikipediaSearch($query) : null;
 
 </body>
 </html>
-
