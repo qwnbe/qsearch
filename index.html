@@ -1,0 +1,188 @@
+﻿<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+    <title>qsearch / Поиск в Интернете</title>
+    <style>
+        body {
+            font-family: "Montserrat", sans-serif;
+            font-optical-sizing: auto;
+            background-color: #d1d1d1;
+            margin: 0;
+            padding: 0;
+            background-image: url('bg.png');
+            background-size: cover;
+            line-height: 1.5;
+        }
+        footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.4);
+        }
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 80px auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(7px);
+            -webkit-backdrop-filter: blur(7px);
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border-radius: 15px;
+            border: 6px solid rgba(255, 255, 255, 0.08);
+        }
+        #usd-rate, #temperature, #location {
+            color: white;
+            margin: 0;
+            text-align: center;
+        }
+        .search-container {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+            max-width: 600px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 10px 40px 10px 10px;
+            font-size: 18px;
+            border-radius: 20px;
+            font-family: "Montserrat", sans-serif;
+            box-sizing: border-box;
+        }
+        .search-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 0;
+        }
+        .slogan {
+            text-align: center;
+            color: #ffffff;
+            font-size: 18px;
+        }
+        .top-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            margin: 10px 0;
+        }
+
+        /* Медиа-запросы для мобильных устройств */
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+                margin: 50px auto;
+                padding: 15px;
+            }
+            .slogan {
+                font-size: 16px;
+            }
+            .search-input {
+                font-size: 16px;
+            }
+            .top-info {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            .slogan {
+                font-size: 14px;
+            }
+            .search-input {
+                padding: 8px 35px 8px 8px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class='name' style="color: #ffffff">qsearch</h1>
+        <p class="slogan">Просто поиск</p>
+        <form action="search.php" method="GET" class="search-container">
+            <input type="text" name="query" placeholder="Ваш запрос" required class="search-input">
+            <button type="submit" class="search-icon">
+                <img src="search.png" alt="Search Icon" class="search-icon">
+            </button>
+        </form>
+        <div class="top-info">
+            <div id="usd-rate">Курс валют: Загрузка...</div>
+            <div id="location">Определение погоды</div>
+            <div id="temperature"></div>
+        </div>
+    </div>
+
+    <script>
+        // Функция для получения курсов валют
+        async function getCurrencyRates() {
+            try {
+                const response = await fetch('https://v6.exchangerate-api.com/v6/09cd49a9bad5f7056508692c/latest/USD');
+                const data = await response.json();
+                const usdRate = data.conversion_rates.USD;
+                const eurRate = data.conversion_rates.EUR;
+                document.getElementById('usd-rate').textContent = `USD: ${usdRate}$  EUR: ${eurRate}$`;
+            } catch (error) {
+                console.error('Ошибка при получении курсов валют:', error);
+            }
+        }
+        getCurrencyRates();
+    </script>
+
+    <script>
+        function getWeather(lat, lon) {
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=033240f99bc36ea159c967c7e7c56e86&units=metric&lang=ru`;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const temp = data.main.temp;
+                    const description = data.weather[0].description;
+                    document.getElementById('location').textContent = ``;
+                    document.getElementById('temperature').innerHTML = `${temp}°C, ${description} <img src="sun.png" alt="Sun Icon" style="width: 24px; height: 24px; vertical-align: middle;">`;
+                })
+                .catch(error => {
+                    document.getElementById('location').textContent = 'Не удалось получить данные о погоде';
+                    console.error('Ошибка:', error);
+                });
+        }
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    getWeather(lat, lon);
+                }, () => {
+                    document.getElementById('location').textContent = 'Не удалось определить местоположение';
+                });
+            } else {
+                document.getElementById('location').textContent = 'Геолокация не поддерживается вашим браузером';
+            }
+        }
+        window.onload = getLocation;
+    </script>
+
+</body>
+<footer> 
+    <p>By qwnbe, 2024</p>
+    <p>Сделано с 💘</p>
+</footer>
+</html>
