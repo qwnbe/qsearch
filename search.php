@@ -1,99 +1,157 @@
 <?php
 session_start();
-// Загружаем данные из JSON файла
-$mockDatabaseFile = 'websites.json';
 
-if (file_exists($mockDatabaseFile)) {
-    $mockDatabaseData = file_get_contents($mockDatabaseFile);
-    $mockDatabase = json_decode($mockDatabaseData, true);
-} else {
+// Настройки подключения к MySQL
+$host = 'localhost';
+$dbname = '';
+$username = '';
+$password = '';
+
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Ошибка подключения к базе данных: " . htmlspecialchars($e->getMessage()));
 }
 
-// Проверка на наличие поискового запроса
 $query = isset($_GET['query']) ? htmlspecialchars($_GET['query']) : "";
+$mathResult = null;
 
-// Обрабатываем историю поиска
-if ($query) {
-    if (!isset($_SESSION['search_history'])) {
-        $_SESSION['search_history'] = array();
+// Функция для вычисления математических выражений безопасно
+function evaluateMathExpression($expression) {
+    $allowedChars = '/^[0-9\+\-\*\/\.\s()]+$/';
+    if (preg_match($allowedChars, $expression)) {
+        try {
+            $result = eval('return ' . $expression . ';');
+            return $result !== false ? $result : "Ошибка при вычислении";
+        } catch (Throwable $e) {
+            return "Некорректное выражение";
+        }
     }
-    array_unshift($_SESSION['search_history'], $query);
-    $_SESSION['search_history'] = array_slice($_SESSION['search_history'], 0, 5);
+    return "Некорректный ввод";
 }
 
-// Функция для поиска по "базе данных"
-function searchResults($query, $database) {
-    $results = array();
-    foreach ($database as $item) {
-        if (stripos($item['title'], $query) !== false || 
-            stripos($item['description'], $query) !== false ||
-            (isset($item['alt_titles']) && array_filter($item['alt_titles'], function($alt) use ($query) {
-                return stripos($alt, $query) !== false;
-            }))) {
-            $results[] = $item;
+// Пример с mathResult
+if ($query && preg_match('/^[0-9\+\-\*\/\.\s()]+$/', $query)) {
+    $mathResult = evaluateMathExpression($query);
+}
+
+// Функция поиска по базе
+function searchResults($query, $pdo) {
+    $results = [];
+    $keywords = array_map('trim', explode(' ', $query));
+    $sql = "SELECT * FROM websites WHERE ";
+    $conditions = [];
+    $params = [];
+
+    if (preg_match('/\.(html|php)$/', $query)) {
+        $conditions[] = "url LIKE :query";
+        $params[':query'] = '%' . $query . '%';
+    } else {
+        foreach ($keywords as $index => $keyword) {
+            $conditions[] = "(title LIKE :keyword{$index} OR description LIKE :keyword{$index} OR alt_titles LIKE :keyword{$index})";
+            $params[":keyword{$index}"] = '%' . $keyword . '%';
         }
+    }
+
+    $sql .= implode(' OR ', $conditions);
+    $stmt = $pdo->prepare($sql);
+    if ($stmt->execute($params)) {
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     return $results;
 }
 
-// Функция для поиска в Википедии
+// Функция поиска Википедии (оптимизирована для минимизации ошибок)
 function wikipediaSearch($query) {
     $url = "https://ru.wikipedia.org/w/api.php?action=query&list=search&srsearch=" . urlencode($query) . "&utf8=&format=json";
-
-    // Инициализация cURL
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Отключаем проверку SSL-сертификата (не рекомендуется для боевого сервера)
-    
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     $response = curl_exec($ch);
     curl_close($ch);
 
     if ($response) {
         $data = json_decode($response, true);
-
         if (!empty($data['query']['search'])) {
             $result = $data['query']['search'][0];
-            $title = $result['title'];
-            $snippet = strip_tags($result['snippet']);
-            $pageUrl = "https://ru.wikipedia.org/wiki/" . urlencode($title);
-
-            return array(
-                "title" => $title,
-                "snippet" => $snippet,
-                "url" => $pageUrl
-            );
+            return [
+                "title" => $result['title'],
+                "snippet" => strip_tags($result['snippet']),
+                "url" => "https://ru.wikipedia.org/wiki/" . urlencode($result['title'])
+            ];
         }
     }
     return null;
 }
 
-// Получаем результаты поиска по "базе данных"
-$results = searchResults($query, $mockDatabase);
-
-// Получаем результат поиска в Википедии
+// Запросы и результаты
+$results = searchResults($query, $pdo);
 $wikiResult = $query ? wikipediaSearch($query) : null;
 ?>
 
+
+
+
+
+
 <!DOCTYPE html>
+
 <html lang="ru">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Результаты поиска для "<?php echo $query; ?>"</title>
+
     <link rel="icon" type="image/png" href="/img/favicon.png">
-    
-    <div class="search">
-        <form action="search.php" method="GET">
-            <img src="/img/favicon.png" alt="Логотип" width="40" height="40"/>
-            <h1>qsearch</h1>
-                <input type="text" name="query" placeholder="Ваш запрос" required class="search-input">
-                <button type="submit" class="search-icon">
-                </button>
-        </form>
-    </div>
+
+
+
     <!-- CSS стили -->
+
     <style>
+
+
+            .search-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 50px 12px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        /* Ensure icon is small and aligned */
+        .search-icon img {
+            width: 20px;
+            height: 20px;
+            display: block;
+            filter: brightness(0) invert(1);
+            position: absolute;
+            right: 28px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            filter: brightness(0) invert(1);
+        }
         /* Стили для страницы */
         body {
             font-family: "Montserrat", sans-serif;
@@ -215,84 +273,98 @@ $wikiResult = $query ? wikipediaSearch($query) : null;
         color: #ffffff;
     }
 
-    .input-container {
-        position: relative;
-        display: flex;
-        align-items: center;
-    }
 
-    /* Поле ввода */
-    .search-input {
-        width: 300px;
-        padding: 10px 40px 10px 15px; /* Оставляем место для иконки справа */
-        font-size: 18px;
-        border-radius: 35px;
-        border: 1px solid #cccccc;
-        outline: none;
-        font-family: "Montserrat", sans-serif;
-        box-sizing: border-box;
-    }
-
-    /* Кнопка иконки поиска */
-    .search-icon {
-        position: absolute;
-        right: 10px; /* Позиция иконки справа */
-        top: 50%;
-        transform: translateY(-50%);
-        width: 24px;
-        height: 24px;
-        cursor: pointer;
-        border: none;
-        background: none;
-        padding: 0;
-    }
-
-    .icon-image {
-        width: 100%;
-        height: 100%;
-    }
     </style>
+
 </head>
+
 <body>
+
     <h1>Результаты поиска для "<?php echo $query; ?>"</h1>
 
-    <?php if (!empty($results)): ?>
-        <?php foreach ($results as $result): ?>
-            <?php
-            $parsedUrl = parse_url($result['url']);
-            $faviconUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'] . '/favicon.ico';
-            ?>
-            <div class="result-item">
-                <img src="<?php echo $faviconUrl; ?>" alt="Favicon" class="favicon" onerror="this.style.display='none'">
-                <div class="result-content">
-                    <div class="result-title">
-                        <a href="<?php echo $result['url']; ?>" target="_blank"><?php echo $result['title']; ?></a>
-                        <?php if (isset($result['verified']) && $result['verified']): ?>
-                            <span class="verified">✔️</span>
-                        <?php endif; ?>
-                    </div>
-                    <div class="result-url"><?php echo $parsedUrl['host']; ?></div>
-                    <div class="result-description"><?php echo $result['description']; ?></div>
-                </div>
-            </div>
-        <?php endforeach; ?>
-    <?php else: ?>
-        <p>Ничего не найдено по вашему запросу.</p>
-        <p>qsearch на ранней стадии разработки, поэтому в нём есть далеко не вся информация!.</p>
+
+
+    <?php if ($mathResult !== null): ?>
+
+        <h2>Результат вычисления: <?php echo $mathResult; ?></h2>
+
     <?php endif; ?>
+
+
+
+    <?php if (!empty($results)): ?>
+
+        <?php foreach ($results as $result): ?>
+
+            <?php
+
+            $parsedUrl = parse_url($result['url']);
+
+            $faviconUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'] . '/favicon.ico';
+
+            ?>
+
+            <div class="result-item">
+
+                <img src="<?php echo $faviconUrl; ?>" alt="Favicon" class="favicon" onerror="this.style.display='none'">
+
+                <div class="result-content">
+
+                    <div class="result-title">
+
+                        <a href="<?php echo $result['url']; ?>" target="_blank"><?php echo $result['title']; ?></a>
+
+                        <?php if (isset($result['verified']) && $result['verified']): ?>
+
+                            <span class="verified">✔️</span>
+
+                        <?php endif; ?>
+
+                    </div>
+
+                    <div class="result-url"><?php echo $parsedUrl['host']; ?></div>
+
+                    <div class="result-description"><?php echo $result['description']; ?></div>
+
+                </div>
+
+            </div>
+
+        <?php endforeach; ?>
+
+    <?php else: ?>
+
+        <p>Ничего не найдено по вашему запросу.</p>
+
+        <p>qsearch на ранней стадии разработки, поэтому в нём есть далеко не вся информация!. Напишите @qwnbe_m в Telegram, если хотите добавить свой сайт на qsearch</p>
+
+    <?php endif; ?>
+
+
 
     <!-- Результат поиска по Википедии -->
+
     <?php if ($wikiResult): ?>
-     <div class="result-item">
-                <img src="https://www.wikipedia.org/static/favicon/wikipedia.ico" alt="Favicon" class="favicon" onerror="this.style.display='none'">
-                <div class="result-content">
-                    <div class="result-title"> 
-           <div class="wiki-title"><a href="<?php echo $wikiResult['url']; ?>" target="_blank"><?php echo $wikiResult['title']; ?></a></div>
-           <div class="wiki-snippet"><?php echo $wikiResult['snippet']; ?></div>
-                    </div>
+
+        <div class="result-item">
+
+            <img src="https://www.wikipedia.org/static/favicon/wikipedia.ico" alt="Favicon" class="favicon" onerror="this.style.display='none'">
+
+            <div class="result-content">
+
+                <div class="result-title"> 
+
+                    <div class="wiki-title"><a href="<?php echo $wikiResult['url']; ?>" target="_blank"><?php echo $wikiResult['title']; ?></a></div>
+
+                    <div class="wiki-snippet"><?php echo $wikiResult['snippet']; ?></div>
+
                 </div>
+
             </div>
-    <?php endif; ?>
+
+        </div>
+
 
 </body>
+
 </html>

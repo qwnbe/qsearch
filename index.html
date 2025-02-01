@@ -1,6 +1,22 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript" >
+   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+   m[i].l=1*new Date();
+   for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+   k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+   ym(99224950, "init", {
+        clickmap:true,
+        trackLinks:true,
+        accurateTrackBounce:true
+   });
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/99224950" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,13 +37,22 @@
             background-size: cover;
         }
 
+footer {
+  position: fixed;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  text-decoration: none;
+  font-size: 16px; /* Размер текста, можно подстроить под себя */
+}
         .container {
             width: 80%;
             max-width: 600px;
             padding: 40px 20px;
             background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(10px);
-            border-radius: 15px;
+            border-radius: 20px;
             text-align: center;
             color: #ffffff;
             box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
@@ -65,6 +90,7 @@
             color: #ffffff;
             outline: none;
             box-sizing: border-box;
+            font-family: "Montserrat", sans-serif;
         }
 
         /* Ensure icon is small and aligned */
@@ -125,12 +151,144 @@
                 font-size: 12px;
             }
         }
+        .snowContainer {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left:0;
+	z-index: -1;
+}
+
+#snow {
+	width: 100%;
+	height: 100%;
+	background-image: url("/snow/snow_1.png"), url("/snow/snow_2.png"), url("/snow/snow_3.png");
+	-webkit-animation: snow 20s linear infinite;
+	-moz-animation: snow 20s linear infinite;
+	-ms-animation: snow 20s linear infinite;
+	animation: snow 20s linear infinite;
+}
+
+@keyframes snow {
+	0% {
+		background-position: 0px 0px, 0px 0px, 0px 0px;
+	}
+	100% {
+		background-position: 500px 1000px, 400px 400px, 300px 300px;
+	}
+}
+
+@-moz-keyframes snow {
+	0% {
+		background-position: 0px 0px, 0px 0px, 0px 0px;
+	}
+	100% {
+		background-position: 500px 1000px, 400px 400px, 300px 300px;
+	}
+}
+
+@-webkit-keyframes snow {
+	0% {
+		background-position: 0px 0px, 0px 0px, 0px 0px;
+	}
+	100% {
+		background-position: 500px 1000px, 400px 400px, 300px 300px;
+	}
+}
+
+@-ms-keyframes snow {
+	0% {
+		background-position: 0px 0px, 0px 0px, 0px 0px;
+	}
+	100% {
+		background-position: 500px 1000px, 400px 400px, 300px 300px;
+	}
+}
+    .ad-banner {
+      width: 300px; /* Ширина баннера */
+      height: 80px; /* Высота баннера */
+      border-radius: 20px; /* Закругление углов */
+      overflow: hidden; /* Чтобы изображение не выходило за пределы прямоугольника */
+      cursor: pointer; /* Курсор при наведении */
+      background-image: url('baseimage.jpg'); /* Путь к изображению */
+      background-size: cover; /* Покрытие всего прямоугольника */
+      background-position: center; /* Центрирование изображения */
+      transition: transform 0.3s ease; /* Плавный эффект при наведении */
+    }
+
+    .ad-banner:hover {
+      transform: scale(1.05); /* Легкое увеличение при наведении */
+    }
+            .history-container {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 10;
+        }
+.time-icon {
+    width: 16px; /* Ширина значка */
+    height: 16px; /* Высота значка */
+    margin-right: 10px; /* Отступ от текста */
+    vertical-align: middle; /* Выравнивание по центру текста */
+}
+.history-item {
+    display: flex;
+    align-items: center; /* Выравнивание значка и текста */
+    padding: 5px 0;
+    cursor: pointer;
+    color: #ffffff;
+    font-size: 14px;
+}
+.history-item:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Подсветка при наведении */
+    border-radius: 8px;
+}
+#temperature {
+    position: relative;
+    padding: 10px;
+    border-radius: 10px; /* Закругленные углы */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Плавный переход */
+    cursor: pointer;
+    text-decoration: none; /* Убирает стандартное подчеркивание ссылки */
+    color: inherit; /* Сохраняет цвет текста из родительского элемента */
+    display: inline-block; /* Делает элемент блочным, чтобы его можно было кликнуть */
+}
+
+#temperature:hover {
+    background-color: rgba(255, 255, 255, 0.2); /* Лёгкий фон при наведении */
+}
+#temperature img {
+    margin-bottom: -3px; /* Сдвигает изображение вверх на 2 пикселя */
+}
+#usd-rate {
+    position: relative;
+    padding: 10px;
+    border-radius: 10px; /* Закругленные углы */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Плавный переход */
+    cursor: pointer;
+    text-decoration: none; /* Убирает стандартное подчеркивание ссылки */
+    color: inherit; /* Сохраняет цвет текста из родительского элемента */
+    display: inline-block; /* Делает элемент блочным, чтобы его можно было кликнуть */
+}
+#usd-rate:hover {
+    background-color: rgba(255, 255, 255, 0.2); /* Лёгкий фон при наведении */
+}
     </style>
 </head>
 <body>
+    <iframe src="counter.php" style="display:none;"></iframe>
     <div class="container">
         <h1>qsearch</h1>
-        <p class="slogan">не просто поиск</p>
+        <a href="playertest.html" class="slogan">КьюМузыка тест (клик)</a>
         <form action="search.php" method="GET" class="search-container">
             <input type="text" name="query" placeholder="Введите запрос" required class="search-input">
             <div class="search-icon">
@@ -138,12 +296,108 @@
             </div>
         </form>
         <div class="info-bar">
-            <div id="usd-rate">USD: ????$</div>
+            <a href="https://yandex.ru/search/?text=доллар&lr=20100&clid=2270455&win=658" id="usd-rate">USD: ????$</a>
             <div id="eur-rate">EUR: ????$</div>
-            <div id="temperature">?°C <img src="sun.png" alt="Weather Icon"></div>
+            <a href="weather.php" id="temperature">
+            ?°C <img src="sun.png" alt="Weather Icon"></a>
         </div>
     </div>
+<script>
+        // Управление cookies для истории
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
 
+        function setCookie(name, value, days = 7) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
+        }
+
+        function loadSearchHistory() {
+            const history = getCookie('searchHistory');
+            return history ? JSON.parse(history) : [];
+        }
+
+        function saveSearchHistory(query) {
+            const history = loadSearchHistory();
+            if (!history.includes(query)) {
+                history.push(query);
+                setCookie('searchHistory', JSON.stringify(history));
+            }
+        }
+
+        function displaySearchHistory(query) {
+    const existingContainer = document.querySelector('.history-container');
+    if (existingContainer) existingContainer.remove();
+
+    const history = loadSearchHistory();
+    if (!history.length) return;
+
+    const filteredHistory = history.filter(item => item.toLowerCase().includes(query.toLowerCase()));
+
+    if (filteredHistory.length) {
+        const historyContainer = document.createElement('div');
+        historyContainer.className = 'history-container';
+
+        filteredHistory.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'history-item';
+
+            // Добавляем значок времени как изображение
+            const timeIcon = document.createElement('img');
+            timeIcon.src = 'clock.png'; // Укажите путь к значку
+            timeIcon.alt = 'Time Icon';
+            timeIcon.className = 'time-icon';
+
+            const text = document.createElement('span');
+            text.textContent = item;
+
+            div.appendChild(timeIcon); // Добавляем значок времени
+            div.appendChild(text);
+
+            div.onclick = () => {
+                document.querySelector('.search-input').value = item;
+            };
+
+            historyContainer.appendChild(div);
+        });
+
+        document.querySelector('.search-container').appendChild(historyContainer);
+    }
+}
+
+        const searchInput = document.querySelector('.search-input');
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            displaySearchHistory(query);
+        });
+
+        document.querySelector('.search-container').addEventListener('submit', (e) => {
+            const query = searchInput.value.trim();
+            if (query) saveSearchHistory(query);
+        });
+
+        // Убираем историю при клике вне поля ввода
+        document.addEventListener('click', (e) => {
+            if (!document.querySelector('.search-container').contains(e.target)) {
+                const historyContainer = document.querySelector('.history-container');
+                if (historyContainer) historyContainer.remove();
+            }
+        });
+    </script>
+<!-- Yandex.RTB R-A-13189279-1 -->
+<div id="yandex_rtb_R-A-13189279-1"></div>
+<script>
+window.yaContextCb.push(() => {
+    Ya.Context.AdvManager.render({
+        "blockId": "R-A-13189279-1",
+        "renderTo": "yandex_rtb_R-A-13189279-1"
+    })
+})
+</script>
     <script>
         // Fetch currency rates
         async function getCurrencyRates() {
@@ -184,5 +438,16 @@
         }
         window.onload = getLocation;
     </script>
+    
+<div class="snowContainer">
+	
+	<div id="snow"></div>
+	
+</div>
 </body>
+<footer>
+<a href="https://t.me/qwnbe_m" target="_blank">
+  <div class="ad-banner"></div>
+</a>
+</footer>
 </html>
